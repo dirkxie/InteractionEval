@@ -10,7 +10,7 @@ from route import navigate
 
 #############global variables##############################
 mac = get_mac()
-server = '169.232.87.64'
+server = '169.232.87.176'
 port = 567
 result = []
 currentLoc = ''
@@ -21,9 +21,9 @@ length = 20
 mapTemp = [['#' for i in range (width)] for j in range(length)] 
 
 ##############store beacon MAC-coordinates pairs############
-beaconMAC = ['98:4F:EE:03:35:B6', '98:4F:EE:03:3A:41', '98:4F:EE:04:A1:F3', '6C:83:36:DE:27:BF', 'D4:97:0B:CB:BC:DC']
-beaconName = ['Yang', 'Dave', 'Paul', 'Bob', 'Adam']
-beaconCo = [[1, 18], [18,1], [18,10], [18,18], [10,18]]
+beaconMAC = ['98:4F:EE:03:35:B6', '98:4F:EE:03:3A:41', '98:4F:EE:04:A1:F3', '6C:83:36:DE:27:BF']
+beaconName = ['Yang', 'Fengyu', 'Yuedan', 'Bob']
+beaconCo = [[18, 10], [10,10], [18,18], [1,10]]
 
 ##############current and previous coordinates of device####
 x_crnt = -1
@@ -46,9 +46,14 @@ class bcolors:
 
 #######################
 
-def localize(result, nearest, posInBeaconList):
+def localize(result, nearest):
     global x_crnt, y_crnt, x_prev, y_prev
     
+    posInBeaconList = 2 
+    for i in range(len(beaconMAC)):
+        if (beaconMAC[i] == result[nearest][0]):
+            posInBeaconList = i
+
     #temp to compare new coordinates with previous
     x_temp = int(x_crnt)
     y_temp = int(y_crnt)
@@ -64,17 +69,18 @@ def localize(result, nearest, posInBeaconList):
     if (y_prev == -1):
         y_prev = beaconCo[posInBeaconList][1]
     
+    print bcolors.WARNING + 'nearest beacon:', beaconName[posInBeaconList] + bcolors.ENDC
 
-    #if (result[nearest][1] > -50):
-    x_crnt = beaconCo[posInBeaconList][0]
-    y_crnt = beaconCo[posInBeaconList][1]
+    if (result[nearest][1] > -60):
+        x_crnt = beaconCo[posInBeaconList][0]
+        y_crnt = beaconCo[posInBeaconList][1]
     
     #temp coordinates
     if (x_temp != x_crnt or y_temp != y_crnt):
         x_prev = x_temp
         y_prev = y_temp
    
-    #print 'x,y_prev:', x_prev, ',', y_prev, 'x,y_crnt:', x_crnt, ',', y_crnt
+    print 'x,y_prev:', x_prev, ',', y_prev, 'x,y_crnt:', x_crnt, ',', y_crnt
 
 def RSSI_scan():
     global x_crnt, y_crnt, x_prev, y_prev, x_des, y_des
@@ -98,17 +104,8 @@ def RSSI_scan():
                         nearest = i
 
         if (len(result) != 0):
-            posInBeaconList = 2 
-            for i in range(len(beaconMAC)):
-                if (beaconMAC[i] == result[nearest][0]):
-                    posInBeaconList = i
-           
-            #print bcolors.WARNING + '[PHASE 1]  nearest beacon: ', beaconName[posInBeaconList] + bcolors.ENDC
-            print bcolors.OKGREEN + '[PHASE 1] ' + bcolors.ENDC,
-            print 'Nearest beacon: ', bcolors.WARNING + beaconName[posInBeaconList] + bcolors.ENDC, ', within: ', bcolors.WARNING + str(result[nearest][2]), 'meters'+ bcolors.ENDC
-
             currentLoc = result[nearest][0]
-            #print 'current at location: ', result[nearest][0], 'within: ', result[nearest][2], ' meters\n'
+            print 'current at location: ', result[nearest][0], 'within: ', result[nearest][2], ' meters\n'
             ### server connection ###
             #upload current location    
             s = socket.socket()
@@ -130,19 +127,19 @@ def RSSI_scan():
             y_desR = s.recv(4)
             x_des = int(x_desR)
             y_des = int(y_desR)
-            print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
-            print 'Destination received from server: ', bcolors.WARNING + x_desR, ',', y_desR + bcolors.ENDC
+            print bcolors.OKGREEN + '[PHASE 3]' + bcolors.ENDC,
+            print 'Destination downloaded from server: ', bcolors.WARNING + x_desR, ',', y_desR + bcolors.ENDC
             
             s.close()
             ### server connection ###
 
             ### localization and navigation ###
-            localize (result, nearest, posInBeaconList)
+            localize (result, nearest)
             navigate (x_prev, y_prev, x_crnt, y_crnt, x_des, y_des, mapTemp)
                        
             print '=============================='
 
-        #time.sleep(3)
+        time.sleep(3)
 
 def waitSvr():
     while True:
