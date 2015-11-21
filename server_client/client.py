@@ -10,7 +10,7 @@ from route import navigate
 
 #############global variables##############################
 mac = get_mac()
-server = '169.232.87.64'
+server = '169.232.87.130'
 port = 567
 result = []
 currentLoc = ''

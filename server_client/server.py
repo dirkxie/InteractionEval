@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import sys
+import MySQLdb as db
 
 svrSoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #Server = '131.179.59.175'
@@ -16,10 +17,10 @@ MAC_list = []
 devLoc_list = []
 clnt_IP = '169.232.86.161'
 
-#def test():
-#  while True:
-#    print 'test'
-#    time.sleep(2)
+loc_db = db.connect(host="localhost", user="root", passwd="xjy920802")
+print "Connected to database successfully."
+
+cursor = loc_db.cursor()
 
 def ServerSoc():
   print threading.currentThread().getName(), 'Starting'
@@ -65,19 +66,27 @@ def ServerSoc():
     elif (devLoc != ''):
       devLoc_list[MACIdx].append(devLoc)
 
-    #print len(devLoc_list)
-
     #print current connected devices
     print 'Current Connected Devices:'
     print MAC_list
     print 'device location history:'
     print devLoc_list
 
-    #update device location
-    
+
     #print 'Device ', clntMAC, 'near ', devLoc
     #print clntSoc.recv(1024)
     print '=================================='
+
+    #update database
+    cursor.execute("use loc_list;")
+    #cursor.execute("show tables;")
+    print str(devLoc), str(clntMAC)
+    cursor.execute("""INSERT INTO loc_list VALUES (%s, %s);""", (str(clntMAC), str(devLoc)))
+    loc_db.commit()
+    cursor.execute("""select * from loc_list;""")
+    tables = cursor.fetchall()
+    print tables
+
 
 def main():
   srvSocThrd = threading.Thread(name='srvSocThrd', target=ServerSoc)
@@ -85,27 +94,4 @@ def main():
   #testThrd = threading.Thread(name='test', target=test)
   #testThrd.start()
   
-  '''
-  sendDesSoc = socket.socket()
-  
-  connectSuccess = 0
-  while connectSuccess == 0:
-    connectFlag = 0
-
-    while True:
-    try:
-      sendDesSoc.connect((clnt_IP, sendDesPort))
-    except Exception:
-      print 'failed to connect client'
-      connectFlag = 1
-      sys.exc_clear()
-      time.sleep(2)
-    
-    if (connectFlag == 0):
-      print 'sucessfully connect client, sending destination'
-      connectSuccess = 1
-      sendDesSoc.send('25')
-      sendDesSoc.send('12')
-      sendDesSoc.close()
-  '''
 main()
