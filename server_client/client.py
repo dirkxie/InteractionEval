@@ -10,7 +10,8 @@ from route import navigate
 
 #############global variables##############################
 mac = get_mac()
-server = '169.232.87.130'
+#server = input ('Please enter the IP address of the server machine, ensure both server and client are in the same network.') 
+server = '169.232.87.141'
 port = 567
 result = []
 currentLoc = ''
@@ -23,15 +24,19 @@ mapTemp = [['#' for i in range (width)] for j in range(length)]
 ##############store beacon MAC-coordinates pairs############
 beaconMAC = ['98:4F:EE:03:35:B6', '98:4F:EE:03:3A:41', '98:4F:EE:04:A1:F3', '6C:83:36:DE:27:BF', 'D4:97:0B:CB:BC:DC']
 beaconName = ['Yang', 'Dave', 'Paul', 'Bob', 'Adam']
-beaconCo = [[1, 18], [18,1], [18,10], [18,18], [10,18]]
+beaconCo = [[1,18,1], [18,1,0], [18,10,0], [18,18,0], [10,18,0]]
+topologyReMappingMap = [1, 2, 3 ,4 ,5 ,6]
 
 ##############current and previous coordinates of device####
 x_crnt = -1
 y_crnt = -1
+z_crnt = -1
 x_prev = -1
 y_prev = -1
+z_prev = -1
 x_des = -1
 y_des = -1
+z_des = -1
 
 ############## ANSI color ##################################
 class bcolors:
@@ -47,11 +52,12 @@ class bcolors:
 #######################
 
 def localize(result, nearest, posInBeaconList):
-    global x_crnt, y_crnt, x_prev, y_prev
+    global x_crnt, y_crnt, z_crnt, x_prev, y_prev, z_prev
     
     #temp to compare new coordinates with previous
     x_temp = int(x_crnt)
     y_temp = int(y_crnt)
+    z_temp = int(z_crnt)
     #print 'temp crnt x,y:', x_temp, y_temp
 
     #update prev and crnt coordinates
@@ -59,25 +65,30 @@ def localize(result, nearest, posInBeaconList):
         x_crnt = beaconCo[posInBeaconList][0]
     if (y_crnt == -1):
         y_crnt = beaconCo[posInBeaconList][1]
+    if (z_crnt == -1):
+        z_crnt = beaconCo[posInBeaconList][2]
     if (x_prev == -1):
         x_prev = beaconCo[posInBeaconList][0]
     if (y_prev == -1):
         y_prev = beaconCo[posInBeaconList][1]
-    
+    if (z_prev == -1):
+        z_prev = beaconCo[posInBeaconList][2]
 
     #if (result[nearest][1] > -50):
     x_crnt = beaconCo[posInBeaconList][0]
     y_crnt = beaconCo[posInBeaconList][1]
-    
+    z_crnt = beaconCo[posInBeaconList][2]
+
     #temp coordinates
-    if (x_temp != x_crnt or y_temp != y_crnt):
+    if (x_temp != x_crnt or y_temp != y_crnt or z_temp != z_crnt):
         x_prev = x_temp
         y_prev = y_temp
-   
+        z_prev = z_temp
+
     #print 'x,y_prev:', x_prev, ',', y_prev, 'x,y_crnt:', x_crnt, ',', y_crnt
 
 def RSSI_scan():
-    global x_crnt, y_crnt, x_prev, y_prev, x_des, y_des
+    global x_crnt, y_crnt, z_crnt, x_prev, y_prev, z_crnt, x_des, y_des, z_des
 
     global mapTemp, beaconMAC
     
@@ -127,18 +138,22 @@ def RSSI_scan():
             
             #if (opCode == 'reqDes'):
             x_desR = s.recv(4)
+            s.send('dummy1')
             y_desR = s.recv(4)
+            s.send('dummy2')
+            z_desR = s.recv(4)
             x_des = int(x_desR)
             y_des = int(y_desR)
+            z_des = int(z_desR)
             print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
-            print 'Destination received from server: ', bcolors.WARNING + x_desR, ',', y_desR + bcolors.ENDC
+            print 'Destination received from server: ', bcolors.WARNING + x_desR, ',', y_desR, ',', z_desR + bcolors.ENDC
             
             s.close()
             ### server connection ###
 
             ### localization and navigation ###
             localize (result, nearest, posInBeaconList)
-            navigate (x_prev, y_prev, x_crnt, y_crnt, x_des, y_des, mapTemp)
+            navigate (x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_des, y_des, z_des, mapTemp)
                        
             print '=============================='
 

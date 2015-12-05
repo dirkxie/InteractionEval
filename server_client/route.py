@@ -77,16 +77,16 @@ def actualDir(x_prev, y_prev, x_crnt, y_crnt, nomDir):
     else:
       return 'down'
 
-def navigate(x_prev, y_prev, x_crnt, y_crnt, x_des, y_des, mapTemp):
+def navigate(x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_des, y_des, z_des, mapTemp):
 
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
-  print 'Previous coordinates:', bcolors.WARNING + str(x_prev), ',', str(y_prev) + bcolors.ENDC
+  print 'Previous coordinates:', bcolors.WARNING + str(x_prev), ',', str(y_prev) , ',', str(z_prev) + bcolors.ENDC
   
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
-  print 'Current coordinates:', bcolors.WARNING + str(x_crnt), ',', str(y_crnt) + bcolors.ENDC
+  print 'Current coordinates:', bcolors.WARNING + str(x_crnt), ',', str(y_crnt), ',', str(z_crnt) + bcolors.ENDC
   
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
-  print 'Destination:', bcolors.WARNING + str(x_des), ',', str(y_des) + bcolors.ENDC
+  print 'Destination:', bcolors.WARNING + str(x_des), ',', str(y_des), ',', str(z_des) + bcolors.ENDC
   
   print bcolors.OKGREEN + '[PHASE 4] ' + bcolors.ENDC,
   print 'Calculating direction'
@@ -94,9 +94,16 @@ def navigate(x_prev, y_prev, x_crnt, y_crnt, x_des, y_des, mapTemp):
   print bcolors.OKGREEN + '[PHASE 4] ' + bcolors.ENDC,
 
   #destination reached
-  if ((x_crnt == x_des) and (y_crnt == y_des)):
+  if ((x_crnt == x_des) and (y_crnt == y_des) and (z_crnt == z_des)):
     print bcolors.FAIL + 'You are at the destination.\n' + bcolors.ENDC
+  #go upstairs on map
+  elif (z_crnt < z_des): #and (mapTemp[x_crnt][y_crnt+1] != '#'):
+    print bcolors.FAIL + 'You should move upstairs' + bcolors.ENDC
   
+  #go downstairs on map
+  elif (z_crnt > z_des): #and (mapTemp[x_crnt][y_crnt+1] != '#'):    
+    print bcolors.FAIL + 'You should move downstairs' + bcolors.ENDC
+
   #go down on map
   elif (y_crnt < y_des) and (mapTemp[x_crnt][y_crnt+1] != '#'):
     print bcolors.FAIL + 'You should move', actualDir(x_prev, y_prev, x_crnt, y_crnt, 'down') + bcolors.ENDC
