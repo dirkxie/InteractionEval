@@ -34,6 +34,7 @@ beaconMAC = ['98:4F:EE:03:35:B6',
              #'98:4F:EE:03:3A:41', 
              #'98:4F:EE:04:A1:F3', 
              #'6C:83:36:DE:27:BF', 
+             '4C:16:F1:42:C4:46',
              'D4:97:0B:CB:BC:DC',
              '98:4F:EE:06:02:92']
 
@@ -41,6 +42,7 @@ beaconName = ['Yang',
               #'Dave', 
               #'Paul', 
               #'Bob', 
+              'Pranshu',
               'Adam', 
               'Kevin']
 
@@ -49,12 +51,14 @@ beaconCo = [[18,1,1],
             #[18,10,0], 
             #[18,18,0], 
             [10,10,0],
+            [18,1,0],
             [10, 1,0]]
 
 beaconNum = [1,
              #-1, 
              #-1, 
-             #-1, 
+             #-1,
+             4,
              3, 
              2]
 
@@ -74,10 +78,10 @@ if (mac == 277913882730528):
     z_des = -1
 elif (mac == 277913881634525):
     x_crnt = 18
-    y_crnt = 18
+    y_crnt = 1
     z_crnt = 1
     x_prev = 18
-    y_prev = 18
+    y_prev = 1
     z_prev = 1
     x_next = -1
     y_next = -1

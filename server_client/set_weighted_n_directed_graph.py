@@ -22,6 +22,8 @@ def directed_and_guided_map_init ():
   graph.add_edge(2, 1, {'cost': 3})
   graph.add_edge(2, 3, {'cost': 4})
   graph.add_edge(3, 2, {'cost': 4})
+  graph.add_edge(3, 4, {'cost': 2})
+  graph.add_edge(4, 3, {'cost': 2})
   graph.add_edge(1, 7, {'cost': 4})
   graph.add_edge(7, 1, {'cost': 4})
 # 3 virtual beacons that does not actually exist
