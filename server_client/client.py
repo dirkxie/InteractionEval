@@ -7,6 +7,7 @@ import inquiry_with_rssi as BTinq
 from route import mapGen
 from route import actualDir
 from route import navigate
+import set_weighted_n_directed_graph as Dijkstra
 
 #############global variables##############################
 mac = get_mac()
@@ -21,22 +22,95 @@ length = 20
 
 mapTemp = [['#' for i in range (width)] for j in range(length)] 
 
+graph = None
+cost_func = None
+
+current_beaconNum = 1
+next_beaconNum = 1
+nodeCountDijkstra = 0
+
 ##############store beacon MAC-coordinates pairs############
-beaconMAC = ['98:4F:EE:03:35:B6', '98:4F:EE:03:3A:41', '98:4F:EE:04:A1:F3', '6C:83:36:DE:27:BF', 'D4:97:0B:CB:BC:DC']
-beaconName = ['Yang', 'Dave', 'Paul', 'Bob', 'Adam']
-beaconCo = [[1,18,1], [18,1,0], [18,10,0], [18,18,0], [10,18,0]]
-topologyReMappingMap = [1, 2, 3 ,4 ,5 ,6]
+beaconMAC = ['98:4F:EE:03:35:B6', 
+             #'98:4F:EE:03:3A:41', 
+             #'98:4F:EE:04:A1:F3', 
+             #'6C:83:36:DE:27:BF', 
+             'D4:97:0B:CB:BC:DC',
+             '98:4F:EE:06:02:92']
+
+beaconName = ['Yang', 
+              #'Dave', 
+              #'Paul', 
+              #'Bob', 
+              'Adam', 
+              'Kevin']
+
+beaconCo = [[18,1,1], 
+            #[18,1,0], 
+            #[18,10,0], 
+            #[18,18,0], 
+            [10,10,0],
+            [10, 1,0]]
+
+beaconNum = [1,
+             #-1, 
+             #-1, 
+             #-1, 
+             3, 
+             2]
 
 ##############current and previous coordinates of device####
-x_crnt = -1
-y_crnt = -1
-z_crnt = -1
-x_prev = -1
-y_prev = -1
-z_prev = -1
-x_des = -1
-y_des = -1
-z_des = -1
+if (mac == 277913882730528):
+    x_crnt = 25
+    y_crnt = 1
+    z_crnt = 0
+    x_prev = 25
+    y_prev = 1
+    z_prev = 0
+    x_next = -1
+    y_next = -1
+    z_next = -1
+    x_des = -1
+    y_des = -1
+    z_des = -1
+elif (mac == 277913881634525):
+    x_crnt = 18
+    y_crnt = 18
+    z_crnt = 1
+    x_prev = 18
+    y_prev = 18
+    z_prev = 1
+    x_next = -1
+    y_next = -1
+    z_next = -1
+    x_des = -1
+    y_des = -1
+    z_des = -1
+elif (mac == 132265794002535):
+    x_crnt = 1
+    y_crnt = 16
+    z_crnt = 0
+    x_prev = 1
+    y_prev = 16
+    z_prev = 0
+    x_next = -1
+    y_next = -1
+    z_next = -1
+    x_des = -1
+    y_des = -1
+    z_des = -1
+else:
+    x_crnt = -1
+    y_crnt = -1
+    z_crnt = -1
+    x_prev = -1
+    y_prev = -1
+    z_prev = -1
+    x_next = -1
+    y_next = -1
+    z_next = -1
+    x_des = -1
+    y_des = -1
+    z_des = -1
 
 ############## ANSI color ##################################
 class bcolors:
@@ -87,10 +161,11 @@ def localize(result, nearest, posInBeaconList):
 
     #print 'x,y_prev:', x_prev, ',', y_prev, 'x,y_crnt:', x_crnt, ',', y_crnt
 
+
 def RSSI_scan():
     global x_crnt, y_crnt, z_crnt, x_prev, y_prev, z_crnt, x_des, y_des, z_des
-
-    global mapTemp, beaconMAC
+    global current_beaconNum, next_beaconNum
+    global mapTemp, beaconMAC, nodeCountDijkstra
     
     print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
     print 'RSSI scan and server upload start: 6~8 sec time interval \n'
@@ -148,13 +223,43 @@ def RSSI_scan():
             print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
             print 'Destination received from server: ', bcolors.WARNING + x_desR, ',', y_desR, ',', z_desR + bcolors.ENDC
             
+            #get beacon number of destination and current nearest beacon
+            #prev_beaconNum = current_beaconNum
+            current_beaconNum = beaconNum[posInBeaconList]
+            
+            des_beaconNum = -1
+            for i in range(len(beaconCo)):
+                if (x_des == beaconCo[i][0] and y_des == beaconCo[i][1] and z_des == beaconCo[i][2]):
+                    des_beaconNum = beaconNum[i]
+            
+
             s.close()
             ### server connection ###
 
             ### localization and navigation ###
             localize (result, nearest, posInBeaconList)
-            navigate (x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_des, y_des, z_des, mapTemp)
-                       
+            
+            nodes, edges, costs, total_cost = Dijkstra.find_path (graph, current_beaconNum, des_beaconNum, cost_func=cost_func)
+            print 'current_beaconNum ', current_beaconNum, 'des_beaconNum', des_beaconNum
+            print nodes
+            #update next node to be passed to navigate function
+            if (current_beaconNum != des_beaconNum):
+                next_beaconNum = nodes[1]
+            
+            #print nodeCountDijkstra
+            
+            for i in range (len(beaconNum)):
+                if (next_beaconNum == beaconNum[i]):
+                    x_next = beaconCo[i][0]
+                    y_next = beaconCo[i][1]
+                    z_next = beaconCo[i][2]
+
+            #    if (prev_beaconNum != nodes[nodeCountDijkstra]):
+            #        nodeCountDijkstra += 1
+            
+            
+
+            navigate (x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_next, y_next, z_next, x_des, y_des, z_des, mapTemp)
             print '=============================='
 
         #time.sleep(3)
@@ -170,20 +275,29 @@ def waitSvr():
         svrSoc.close()
 
 def main():
+    global graph, cost_func
+
+    print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
     print 'generating demo map'
     mapGen(mapTemp)
-    print mapTemp
+    #print mapTemp
+    print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
+    print 'generating directed and weighted topology map for shortest path finding'
+    graph, cost_func = Dijkstra.directed_and_guided_map_init()  
 
     #get MAC address of this device
+    print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
     print 'MAC address of this device is ', mac
     
     #create client socket
     s = socket.socket()
+    print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
     print 'initial ping to server'
     s.connect((server, port))
 
     ##send MAC addr to server
     s.send(str(mac))
+    print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
     print s.recv(1024)
 
     s.send(str(currentLoc))
@@ -198,9 +312,11 @@ def main():
 
 #print start info
 print 'Welcome to use our system'
+print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
 print 'Initializing client socket'
 waitSoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 waitSocName = socket.gethostname()
+print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
 print 'client socket name: ', waitSocName
 waitSocPort = 9999
 #waitSoc.bind(('169.232.86.92', waitSocPort))
@@ -208,6 +324,7 @@ waitSocPort = 9999
 
 
 #initialize bluetooth
+print bcolors.OKBLUE + '[PHASE 0] ' + bcolors.ENDC,
 print 'initializing Bluetooth'
 BTsock = BTinq.bluetooth_init()
 

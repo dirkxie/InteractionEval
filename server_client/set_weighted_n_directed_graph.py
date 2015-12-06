@@ -14,8 +14,8 @@ graph = None
 cost_func = None
 
 def directed_and_guided_map_init ():
-  global graph
-  global cost_func
+  graph = None
+  cost_func = None
   graph = Graph()
 # 4 real beacons
   graph.add_edge(1, 2, {'cost': 3})
@@ -36,9 +36,11 @@ def directed_and_guided_map_init ():
 
   cost_func = lambda u, v, e, prev_e: e['cost']
 
-def main():
-  directed_and_guided_map_init()
-  a, b, c, d = find_path(graph, 7, 2, cost_func=cost_func)
-  print a
+  return graph, cost_func
 
-main()
+#def main():
+  #directed_and_guided_map_init()
+  #a, b, c, d = find_path(graph, 7, 2, cost_func=cost_func)
+  #print a
+
+#main()

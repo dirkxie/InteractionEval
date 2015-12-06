@@ -77,14 +77,16 @@ def actualDir(x_prev, y_prev, x_crnt, y_crnt, nomDir):
     else:
       return 'down'
 
-def navigate(x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_des, y_des, z_des, mapTemp):
+def navigate(x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_next, y_next, z_next, x_des, y_des, z_des, mapTemp):
 
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
   print 'Previous coordinates:', bcolors.WARNING + str(x_prev), ',', str(y_prev) , ',', str(z_prev) + bcolors.ENDC
   
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
   print 'Current coordinates:', bcolors.WARNING + str(x_crnt), ',', str(y_crnt), ',', str(z_crnt) + bcolors.ENDC
-  
+  print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
+  print 'Next checkpoint coordinates:', bcolors.WARNING + str(x_next), ',', str(y_next), ',', str(z_next) + bcolors.ENDC
+
   print bcolors.OKGREEN + '[PHASE 3] ' + bcolors.ENDC,
   print 'Destination:', bcolors.WARNING + str(x_des), ',', str(y_des), ',', str(z_des) + bcolors.ENDC
   
@@ -97,27 +99,27 @@ def navigate(x_prev, y_prev, z_prev, x_crnt, y_crnt, z_crnt, x_des, y_des, z_des
   if ((x_crnt == x_des) and (y_crnt == y_des) and (z_crnt == z_des)):
     print bcolors.FAIL + 'You are at the destination.\n' + bcolors.ENDC
   #go upstairs on map
-  elif (z_crnt < z_des): #and (mapTemp[x_crnt][y_crnt+1] != '#'):
+  elif (z_crnt < z_next): #and (mapTemp[x_crnt][y_crnt+1] != '#'):
     print bcolors.FAIL + 'You should move upstairs' + bcolors.ENDC
   
   #go downstairs on map
-  elif (z_crnt > z_des): #and (mapTemp[x_crnt][y_crnt+1] != '#'):    
+  elif (z_crnt > z_next): #and (mapTemp[x_crnt][y_crnt+1] != '#'):    
     print bcolors.FAIL + 'You should move downstairs' + bcolors.ENDC
 
   #go down on map
-  elif (y_crnt < y_des) and (mapTemp[x_crnt][y_crnt+1] != '#'):
+  elif (y_crnt < y_next): #and (mapTemp[x_crnt][y_crnt+1] != '#'):
     print bcolors.FAIL + 'You should move', actualDir(x_prev, y_prev, x_crnt, y_crnt, 'down') + bcolors.ENDC
 
   #turn left on map
-  elif (x_crnt > x_des) and (mapTemp[x_crnt-1][y_crnt] != '#'):
+  elif (x_crnt > x_next): #and (mapTemp[x_crnt-1][y_crnt] != '#'):
     print bcolors.FAIL + 'You should move', actualDir(x_prev, y_prev, x_crnt, y_crnt, 'left') + bcolors.ENDC 
 
   #go up on map
-  elif (y_crnt > y_des) and (mapTemp[x_crnt][y_crnt-1] != '#'):
+  elif (y_crnt > y_next): #and (mapTemp[x_crnt][y_crnt-1] != '#'):
     print bcolors.FAIL + 'You should move', actualDir(x_prev, y_prev, x_crnt, y_crnt, 'up') + bcolors.ENDC
 
   #turn right on map
-  elif (x_crnt < x_des) and (mapTemp[x_crnt+1][y_crnt] != '#'):
+  elif (x_crnt < x_next): #and (mapTemp[x_crnt+1][y_crnt] != '#'):
     print bcolors.FAIL + 'You should move', actualDir(x_prev, y_prev, x_crnt, y_crnt, 'right') + bcolors.ENDC
 
 #def main():
