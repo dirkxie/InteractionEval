@@ -12,7 +12,7 @@ import set_weighted_n_directed_graph as Dijkstra
 #############global variables##############################
 mac = get_mac()
 #server = input ('Please enter the IP address of the server machine, ensure both server and client are in the same network.') 
-server = '169.232.87.141'
+server = '131.179.58.83'
 port = 567
 result = []
 currentLoc = ''
